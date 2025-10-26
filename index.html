@@ -14,273 +14,109 @@
       - Login com Facebook via OAuth
     Observação: a lógica básica está em marketplace.js
   -->
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #0f172a;           /* azul-ardósia escuro */
-      --panel: #111827;        /* cinza-ardósia muito escuro */
-      --muted: #94a3b8;        /* cinza azulado */
-      --text: #e5e7eb;         /* cinza claro */
-      --brand: #22c55e;        /* verde destaque */
-      --brand-2: #16a34a;      /* verde escuro */
-      --card: #0b1220;         /* tom para cartões */
-      --stroke: #1f2937;       /* bordas sutis */
-      --warning: #f59e0b;      /* laranja */
+      --bg: #0f172a;          /* azul-ardósia escuro */
+      --panel: #111827;       /* cinza-ardósia muito escuro */
+      --muted: #94a3b8;       /* cinza azulado */
+      --text: #e5e7eb;        /* cinza claro */
+      --brand: #22c55e;       /* verde destaque */
+      --brand-2: #16a34a;     /* verde escuro */
+      --card: #0b1220;        /* tom para cartões */
+      --stroke: #1f2937;      /* bordas sutis */
+      --warning: #f59e0b;     /* laranja */
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
       margin: 0;
       background: radial-gradient(1200px 1200px at 90% -10%, rgba(34,197,94,.25), transparent 40%),
+                  radial-gradient(1000px 800px at 10% 120%, rgba(124,58,237,.15), transparent 50%),
                   var(--bg);
       color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.9375rem;
-      line-height: 1.6;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
     }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
     header {
-      position: sticky; top: 0; z-index: 99;
-      background: var(--panel);
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(17,24,39,.75); backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--stroke);
-      padding: 0.75rem 0;
     }
-    header .wrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-    .logo { font-size: 1.25rem; font-weight: 700; color: var(--brand); text-decoration: none; }
-    .search-box {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      flex: 1;
-      max-width: 500px;
-    }
-    .search-box input {
-      flex: 1;
-      background: transparent;
-      border: 0;
-      color: var(--text);
-      outline: none;
-    }
-    .search-box input::placeholder { color: var(--muted); }
-    
-    /* Estilo para botão de login com Facebook */
-    .auth-section {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    #loginFacebook {
-      background: #1877f2;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.875rem;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    #loginFacebook:hover {
-      background: #166fe5;
-    }
-    #userInfo {
-      display: none;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    #userInfo.show {
-      display: flex;
-    }
-    #userName {
-      font-size: 0.875rem;
-      color: var(--text);
-    }
-    #logoutButton {
-      background: var(--card);
-      color: var(--text);
-      border: 1px solid var(--stroke);
-      padding: 0.375rem 0.75rem;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      font-size: 0.8125rem;
-    }
-    #logoutButton:hover {
-      background: var(--stroke);
-    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:700; }
+    .brand-badge { width:28px; height:28px; border-radius:8px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); display:grid; place-items:center; color:#052e16; font-weight:900; }
+    .actions { display:flex; gap:8px; align-items:center; }
+    .btn { background: var(--brand); border:none; color:#052e16; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+    .btn:hover { background: var(--brand-2); color:#031a0c; }
+    .chip { background:#0b1220; border:1px solid var(--stroke); color:var(--text); padding:8px 10px; border-radius:999px; cursor:pointer; }
+    .muted { color: var(--muted); }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:16px; }
+    .card { background: var(--card); border:1px solid var(--stroke); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+    .card .thumb { height:120px; border-radius:10px; display:grid; place-items:center; background:#0f172a; font-size:40px; }
+    .card .meta { display:flex; justify-content:space-between; align-items:center; }
+    .price { color: #86efac; font-weight:700; }
+    .rating { color: #fde68a; }
+    .header-row { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+    .searchbar { flex:1; display:flex; gap:8px; }
+    input[type="search"], select { background:#0b1220; border:1px solid var(--stroke); color:var(--text); padding:10px 12px; border-radius:10px; width:100%; }
 
-    .filters {
-      background: var(--panel);
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--stroke);
-    }
-    .chips {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .chip {
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: 0.375rem;
-      padding: 0.375rem 0.75rem;
-      font-size: 0.8125rem;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .chip:hover { background: var(--stroke); }
-    .chip.active {
-      background: var(--brand);
-      border-color: var(--brand);
-      color: #000;
-      font-weight: 600;
-    }
-    .grid {
-      padding: 2rem 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1rem;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      cursor: pointer;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .card:hover {
-      border-color: var(--brand);
-      transform: translateY(-2px);
-    }
-    .thumb {
-      font-size: 3rem;
-      text-align: center;
-      margin-bottom: 0.5rem;
-    }
-    .card h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1rem;
-      font-weight: 600;
-    }
-    .seller {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .desc {
-      font-size: 0.8125rem;
-      color: var(--muted);
-      margin-bottom: 0.75rem;
-    }
-    .meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .price {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--brand);
-    }
-    .rating {
-      font-size: 0.8125rem;
-      color: var(--warning);
-    }
-    footer {
-      background: var(--panel);
-      border-top: 1px solid var(--stroke);
-      padding: 2rem 0;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.8125rem;
-    }
-    dialog {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90%;
-      max-width: 500px;
-      background: var(--panel);
-      border: 1px solid var(--stroke);
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      color: var(--text);
-    }
-    dialog::backdrop {
-      background: rgba(0, 0, 0, 0.7);
-    }
-    .modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .modal-body .thumb {
-      font-size: 4rem;
-    }
-    .modal-body .muted {
-      color: var(--muted);
-      font-size: 0.8125rem;
-      margin-bottom: 0.5rem;
-    }
-    .modal-body .meta {
-      margin: 1rem 0;
-    }
-    .modal-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    .btn {
-      flex: 1;
-      background: var(--brand);
-      border: 0;
-      border-radius: 0.375rem;
-      padding: 0.625rem 1rem;
-      color: #000;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.875rem;
-    }
-    .btn:hover { background: var(--brand-2); }
+    /* Facebook button styling */
+    #fbLoginBtn { background:#1877f2; color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; }
+    #fbLoginBtn:hover { background:#166fe5; }
+    #userInfo { display:none; align-items:center; gap:10px; }
+    #userAvatar { width:28px; height:28px; border-radius:50%; display:none; }
   </style>
+
+  <!-- Facebook SDK (carregado de forma assíncrona) -->
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId: '1363366952176543',
+        cookie: true,
+        xfbml: true,
+        version: 'v19.0'
+      });
+    };
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {return;}
+      js = d.createElement(s); js.id = id;
+      js.src = 'https://connect.facebook.net/pt_BR/sdk.js';
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
 </head>
+
 <body>
+  <div id="facebook-jssdk" aria-hidden="true" style="display:none"></div>
   <header>
-    <div class="wrap">
-      <a href="#" class="logo">🛒 Loja Marketplace</a>
-      <div class="search-box">
-        <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="Buscar assinaturas..." />
+    <div class="wrap header-row">
+      <div class="brand">
+        <div class="brand-badge">M</div>
+        Loja de Assinaturas
       </div>
-      <!-- Seção de autenticação com Facebook -->
-      <div class="auth-section">
-        <button id="loginFacebook">
-          <span>📘</span>
-          Entrar com o Facebook
-        </button>
-        <div id="userInfo">
-          <span id="userName"></span>
-          <button id="logoutButton">Sair</button>
+      <div class="actions">
+        <!-- Área de usuário -->
+        <div id="userInfo" class="muted">
+          <img id="userAvatar" alt="Avatar" />
+          <span>Olá, <strong id="userName"></strong></span>
+          <button id="logoutButton" class="chip" type="button">Sair</button>
         </div>
+        <!-- Botão de login Facebook -->
+        <button id="fbLoginBtn" type="button" aria-label="Entrar com Facebook">
+          <!-- pequeno ícone F -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12.06C22 6.48 17.52 2 11.94 2 6.36 2 1.88 6.48 1.88 12.06c0 5.01 3.66 9.16 8.44 9.94v-7.03H7.9v-2.91h2.42V9.64c0-2.39 1.42-3.71 3.58-3.71 1.04 0 2.13.19 2.13.19v2.35h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.91H13.3V22c4.78-.78 8.44-4.93 8.44-9.94Z"/></svg>
+          Entrar com Facebook
+        </button>
       </div>
     </div>
   </header>
+
   <main class="wrap">
     <!-- Chips de filtros adicionais (simples) -->
     <section class="filters">
@@ -291,14 +127,17 @@
         <div class="chip" data-chip="garantia">Garantia</div>
       </div>
     </section>
+
     <!-- Grid de anúncios -->
     <section id="grid" class="grid" aria-live="polite">
       <!-- Cards inseridos dinamicamente por marketplace.js -->
     </section>
   </main>
+
   <footer>
     <div class="wrap">Projeto de exemplo para marketplace de assinaturas. Código com comentários explicativos.</div>
   </footer>
+
   <!-- Modal de detalhes do anúncio -->
   <dialog id="detalhesModal">
     <div class="modal-head">
@@ -320,7 +159,81 @@
       <button class="btn" id="btnSimularCompra">Simular compra</button>
     </div>
   </dialog>
-  <!-- Scripts -->
+
+  <!-- Scripts principais -->
   <script src="marketplace.js"></script>
+  <script>
+    // Fluxo de Login com Facebook
+    const fbLoginBtn = document.getElementById('fbLoginBtn');
+    const userInfoEl = document.getElementById('userInfo');
+    const userNameEl = document.getElementById('userName');
+    const userAvatarEl = document.getElementById('userAvatar');
+    const logoutBtn = document.getElementById('logoutButton');
+
+    function updateUIForUser(user) {
+      if (user) {
+        userNameEl.textContent = user.name || '';
+        if (user.picture && user.picture.data && user.picture.data.url) {
+          userAvatarEl.src = user.picture.data.url;
+          userAvatarEl.style.display = 'block';
+        } else {
+          userAvatarEl.style.display = 'none';
+        }
+        userInfoEl.style.display = 'flex';
+        fbLoginBtn.style.display = 'none';
+      } else {
+        userNameEl.textContent = '';
+        userAvatarEl.style.display = 'none';
+        userInfoEl.style.display = 'none';
+        fbLoginBtn.style.display = 'inline-flex';
+      }
+    }
+
+    function fetchUserProfile() {
+      FB.api('/me', { fields: 'name,picture.width(64).height(64)' }, function(response) {
+        if (!response || response.error) {
+          console.error('Erro ao buscar perfil:', response && response.error);
+          updateUIForUser(null);
+          return;
+        }
+        updateUIForUser(response);
+      });
+    }
+
+    function ensureLoginAndFetchProfile() {
+      FB.getLoginStatus(function(statusResponse) {
+        if (statusResponse.status === 'connected') {
+          fetchUserProfile();
+        } else {
+          FB.login(function(loginResponse) {
+            if (loginResponse.authResponse) {
+              fetchUserProfile();
+            } else {
+              console.log('Login com Facebook cancelado.');
+            }
+          }, { scope: 'public_profile' });
+        }
+      });
+    }
+
+    fbLoginBtn?.addEventListener('click', function() {
+      ensureLoginAndFetchProfile();
+    });
+
+    logoutBtn?.addEventListener('click', function() {
+      FB.logout(function() {
+        updateUIForUser(null);
+      });
+    });
+
+    // Tenta restaurar sessão ao carregar a página
+    window.addEventListener('load', function() {
+      if (typeof FB !== 'undefined') {
+        FB.getLoginStatus(function(res){
+          if (res.status === 'connected') fetchUserProfile();
+        });
+      }
+    });
+  </script>
 </body>
 </html>
