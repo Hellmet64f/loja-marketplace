@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg: #0f172a;          /* azul-ardósia escuro */
@@ -19,6 +20,7 @@
       --card: #0b1220;        /* tom para cartões */
       --stroke: #1f2937;      /* bordas sutis */
       --warning: #f59e0b;     /* laranja */
+      --danger: #ef4444;      /* vermelho erro */
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -55,34 +57,18 @@
     #userAvatar { width:28px; height:28px; border-radius:50%; display:none; }
     .notice { background: #0b1220; border-bottom: 1px dashed var(--warning); color: var(--warning); padding: 10px 16px; font-weight: 600; }
     .notice code { color: #fde68a; }
+    .error-box { background:#1f2937; border-left:4px solid var(--danger); color:#fecaca; padding:10px 12px; border-radius:8px; margin:12px 16px; display:none; white-space:pre-wrap; }
   </style>
-  <!-- Facebook SDK: ensure correct locale and async init -->
-  <script>
-    window.fbAsyncInit = function() {
-      FB.init({
-        appId: '1363366952176543',
-        cookie: true,
-        xfbml: true,
-        version: 'v19.0'
-      });
-      // Optionally check status on init
-      FB.getLoginStatus(function(res){ if(res.status === 'connected') fetchUserProfile(); });
-    };
-    (function(d, s, id){
-      var js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) {return;}
-      js = d.createElement(s); js.id = id;
-      js.src = 'https://connect.facebook.net/pt_BR/sdk.js';
-      fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-  </script>
-  <meta property="fb:app_id" content="1363366952176543">
-  <meta property="og:site_name" content="Loja Marketplace">
-  <!-- For troubleshooting: declare allowed domain explicitly -->
-  <meta name="facebook-domain-verification" content="hellmet64f.github.io">
+
+  <!-- Open Graph / FB App config -->
+  <meta property="fb:app_id" content="1363366952176543" />
+  <meta property="og:site_name" content="Loja Marketplace" />
+  <meta name="facebook-domain-verification" content="hellmet64f.github.io" />
 </head>
 <body>
-  <div id="facebook-jssdk" aria-hidden="true" style="display:none"></div>
+  <!-- Facebook SDK root -->
+  <div id="fb-root"></div>
+
   <header>
     <div class="notice">
       Aviso: Login do Facebook funciona apenas em domínios autorizados. Publique via GitHub Pages em https://hellmet64f.github.io/loja-marketplace/ e adicione este domínio no App do Facebook (Settings > Basic > App Domains). Para testar sem produção, use usuários de teste no painel do app.
@@ -100,28 +86,33 @@
           <button class="chip" id="logoutButton" type="button">Sair</button>
         </div>
         <!-- Botão de login Facebook -->
-        <button aria-label="Entrar com Facebook" id="fbLoginBtn" type="button">
-          <svg aria-hidden="true" fill="currentColor" width="16" height="16" viewBox="0 0 24 24"><path d="M22 12.06C22 6.48 17.52 2 11.94 2 6.36 2 1.88 6.48 1.88 12.06c0 5.01 3.66 9.16 8.44 9.94v-7.03H7.9v-2.91h2.42V9.64c0-2.39 1.42-3.71 3.58-3.71 1.04 0 2.13.19 2.13.19v2.35h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.91H13.3V22c4.78-.78 8.44-4.93 8.44-9.94Z"></path></svg>
+        <button id="fbLoginBtn" type="button" aria-label="Entrar com Facebook">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.48 17.52 2 11.94 2 6.36 2 1.88 6.48 1.88 12.06c0 5.01 3.66 9.16 8.44 9.94v-7.03H7.9v-2.91h2.42V9.64c0-2.39 1.42-3.71 3.58-3.71 1.04 0 2.13.19 2.13.19v2.35h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.91H13.3V22c4.78-.78 8.44-4.93 8.44-9.94Z"/></svg>
           Entrar com Facebook
         </button>
       </div>
     </div>
   </header>
+
+  <div id="fbError" class="error-box" role="alert" aria-live="assertive"></div>
+
   <main class="wrap">
     <!-- Chips de filtros adicionais (simples) -->
     <section class="filters">
-      <div class="chips" id="chips">
+      <div id="chips" class="chips">
         <div class="chip" data-chip="entrega-imediata">Entrega imediata</div>
         <div class="chip" data-chip="4k">Suporte 4K</div>
         <div class="chip" data-chip="perfil-privado">Perfil privado</div>
         <div class="chip" data-chip="garantia">Garantia</div>
       </div>
     </section>
+
     <!-- Grid de anúncios -->
     <section id="grid" class="grid" aria-live="polite">
       <!-- Cards inseridos dinamicamente por marketplace.js -->
     </section>
   </main>
+
   <footer>
     <div class="wrap">Projeto de exemplo para marketplace de assinaturas. Código com comentários explicativos.</div>
   </footer>
@@ -149,79 +140,150 @@
   </dialog>
 
   <!-- Scripts principais -->
-  <script src="marketplace.js"></script>
+  <script src="marketplace.js" defer></script>
+
+  <!-- Facebook SDK robust loader and login flow -->
   <script>
-    // Fluxo de Login com Facebook
-    const fbLoginBtn = document.getElementById('fbLoginBtn');
-    const userInfoEl = document.getElementById('userInfo');
-    const userNameEl = document.getElementById('userName');
-    const userAvatarEl = document.getElementById('userAvatar');
-    const logoutBtn = document.getElementById('logoutButton');
+    (function() {
+      const APP_ID = '1363366952176543';
+      const APP_VERSION = 'v19.0';
+      const ALLOWED_HOSTS = new Set([
+        'hellmet64f.github.io',
+        'localhost',
+        '127.0.0.1'
+      ]);
 
-    function updateUIForUser(user) {
-      if (user) {
-        userNameEl.textContent = user.name || '';
-        if (user.picture && user.picture.data && user.picture.data.url) {
-          userAvatarEl.src = user.picture.data.url;
-          userAvatarEl.style.display = 'block';
-        } else {
-          userAvatarEl.style.display = 'none';
-        }
-        userInfoEl.style.display = 'flex';
-        if (fbLoginBtn) fbLoginBtn.style.display = 'none';
-      } else {
-        userNameEl.textContent = '';
-        userAvatarEl.style.display = 'none';
-        userInfoEl.style.display = 'none';
-        if (fbLoginBtn) fbLoginBtn.style.display = 'inline-flex';
+      const fbErrorEl = document.getElementById('fbError');
+      const fbLoginBtn = document.getElementById('fbLoginBtn');
+      const userInfoEl = document.getElementById('userInfo');
+      const userNameEl = document.getElementById('userName');
+      const userAvatarEl = document.getElementById('userAvatar');
+      const logoutBtn = document.getElementById('logoutButton');
+
+      function showError(message, detail) {
+        if (!fbErrorEl) return;
+        fbErrorEl.style.display = 'block';
+        fbErrorEl.textContent = message + (detail ? `\nDetalhes: ${detail}` : '');
+        console.error('[FB-LOGIN]', message, detail || '');
       }
-    }
 
-    function fetchUserProfile() {
-      FB.api('/me', { fields: 'name,picture.width(64).height(64)' }, function(response) {
-        if (!response || response.error) {
-          console.error('Erro ao buscar perfil:', response && response.error);
-          updateUIForUser(null);
-          return;
+      function clearError() {
+        if (fbErrorEl) { fbErrorEl.style.display = 'none'; fbErrorEl.textContent = ''; }
+      }
+
+      function validateEnvironment() {
+        const host = location.hostname;
+        if (!ALLOWED_HOSTS.has(host)) {
+          showError('Domínio atual não autorizado no App do Facebook.', `Host: ${host}. Adicione este domínio em App Domains ou use hellmet64f.github.io.`);
+          return false;
         }
-        updateUIForUser(response);
-      });
-    }
+        if (!APP_ID || APP_ID === 'YOUR_FB_APP_ID') {
+          showError('Configuração appId ausente ou inválida.', 'Defina APP_ID corretamente.');
+          return false;
+        }
+        return true;
+      }
 
-    function ensureLoginAndFetchProfile() {
-      FB.getLoginStatus(function(statusResponse) {
-        if (statusResponse.status === 'connected') {
-          fetchUserProfile();
+      // Prevent duplicate SDK injection
+      function ensureFbSdkInjected() {
+        if (document.getElementById('facebook-jssdk')) return true;
+        const js = document.createElement('script');
+        js.id = 'facebook-jssdk';
+        js.async = true;
+        js.defer = true;
+        js.crossOrigin = 'anonymous';
+        js.src = 'https://connect.facebook.net/pt_BR/sdk.js';
+        js.onerror = () => showError('Falha ao carregar o SDK do Facebook.', 'Verifique conexão, bloqueadores e CORS.');
+        const fjs = document.getElementsByTagName('script')[0] || document.body;
+        fjs.parentNode.insertBefore(js, fjs);
+        return false; // will be ready later
+      }
+
+      function updateUIForUser(user) {
+        if (user) {
+          userNameEl.textContent = user.name || '';
+          if (user.picture && user.picture.data && user.picture.data.url) {
+            userAvatarEl.src = user.picture.data.url;
+            userAvatarEl.style.display = 'block';
+          } else {
+            userAvatarEl.style.display = 'none';
+          }
+          userInfoEl.style.display = 'flex';
+          if (fbLoginBtn) fbLoginBtn.style.display = 'none';
         } else {
-          FB.login(function(loginResponse) {
-            if (loginResponse.authResponse) {
-              fetchUserProfile();
-            } else {
-              console.log('Login com Facebook cancelado.');
-            }
-          }, { scope: 'public_profile' });
+          userNameEl.textContent = '';
+          userAvatarEl.style.display = 'none';
+          userInfoEl.style.display = 'none';
+          if (fbLoginBtn) fbLoginBtn.style.display = 'inline-flex';
         }
-      });
-    }
+      }
 
-    fbLoginBtn?.addEventListener('click', function() {
-      ensureLoginAndFetchProfile();
-    });
-
-    logoutBtn?.addEventListener('click', function() {
-      FB.logout(function() {
-        updateUIForUser(null);
-      });
-    });
-
-    // Tenta restaurar sessão ao carregar a página
-    window.addEventListener('load', function() {
-      if (typeof FB !== 'undefined') {
-        FB.getLoginStatus(function(res){
-          if (res.status === 'connected') fetchUserProfile();
+      function fetchUserProfile() {
+        FB.api('/me', { fields: 'name,picture.width(64).height(64)' }, function(response) {
+          if (!response || response.error) {
+            const detail = response && response.error ? `${response.error.type || ''} ${response.error.code || ''} ${response.error.message || ''}`.trim() : 'Resposta vazia';
+            showError('Erro ao buscar perfil do usuário.', detail);
+            updateUIForUser(null);
+            return;
+          }
+          clearError();
+          updateUIForUser(response);
         });
       }
-    });
-  </script>
-</body>
-</html>
+
+      function ensureLoginAndFetchProfile() {
+        clearError();
+        if (!window.FB) {
+          showError('SDK do Facebook ainda não está pronto.', 'Aguarde o carregamento do SDK e tente novamente.');
+          return;
+        }
+        FB.getLoginStatus(function(statusResponse) {
+          if (!statusResponse) {
+            showError('Não foi possível obter o status de login.');
+            return;
+          }
+          if (statusResponse.status === 'connected') {
+            fetchUserProfile();
+          } else {
+            FB.login(function(loginResponse) {
+              if (loginResponse && loginResponse.authResponse) {
+                fetchUserProfile();
+              } else {
+                showError('Login com Facebook cancelado ou negado pelo usuário.');
+              }
+            }, { scope: 'public_profile' });
+          }
+        });
+      }
+
+      function initFb() {
+        if (!validateEnvironment()) return;
+        window.fbAsyncInit = function() {
+          try {
+            FB.init({
+              appId: APP_ID,
+              cookie: true,
+              xfbml: false,
+              version: APP_VERSION,
+              status: true
+            });
+            // Optionally check status on init
+            FB.getLoginStatus(function(res){ if (res && res.status === 'connected') fetchUserProfile(); });
+          } catch (e) {
+            showError('Falha ao inicializar o Facebook SDK.', String(e));
+          }
+        };
+        ensureFbSdkInjected();
+      }
+
+      // Wire UI events
+      fbLoginBtn?.addEventListener('click', ensureLoginAndFetchProfile);
+      logoutBtn?.addEventListener('click', function() {
+        if (!window.FB) { updateUIForUser(null); return; }
+        FB.logout(function() {
+          updateUIForUser(null);
+        });
+      });
+
+      // Init on load
+      window.addEventListener('load', function()
