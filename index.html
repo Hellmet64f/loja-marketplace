@@ -4,22 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Loja Marketplace - Assinaturas</title>
-  <!--
-    Página inicial de um marketplace estilo Shopee/OLX
-    Foco: anúncios de assinaturas (Netflix, HBO Max, Prime Video etc.)
-    Recursos:
-      - Barra de busca e filtros (categoria, preço, avaliação)
-      - Grid de cards de anúncios
-      - Modal de detalhes com ação de "Simular compra"
-      - Login com Facebook via OAuth
-    Observação: a lógica básica está em marketplace.js
-  -->
-
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --bg: #0f172a;          /* azul-ardósia escuro */
@@ -42,11 +30,7 @@
       color: var(--text);
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
     }
-    header {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(17,24,39,.75); backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--stroke);
-    }
+    header { position: sticky; top: 0; z-index: 10; background: rgba(17,24,39,.75); backdrop-filter: blur(8px); border-bottom: 1px solid var(--stroke); }
     .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
     .brand { display:flex; align-items:center; gap:10px; font-weight:700; }
     .brand-badge { width:28px; height:28px; border-radius:8px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); display:grid; place-items:center; color:#052e16; font-weight:900; }
@@ -64,15 +48,15 @@
     .header-row { display:flex; justify-content:space-between; align-items:center; gap:16px; }
     .searchbar { flex:1; display:flex; gap:8px; }
     input[type="search"], select { background:#0b1220; border:1px solid var(--stroke); color:var(--text); padding:10px 12px; border-radius:10px; width:100%; }
-
     /* Facebook button styling */
     #fbLoginBtn { background:#1877f2; color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; }
     #fbLoginBtn:hover { background:#166fe5; }
     #userInfo { display:none; align-items:center; gap:10px; }
     #userAvatar { width:28px; height:28px; border-radius:50%; display:none; }
+    .notice { background: #0b1220; border-bottom: 1px dashed var(--warning); color: var(--warning); padding: 10px 16px; font-weight: 600; }
+    .notice code { color: #fde68a; }
   </style>
-
-  <!-- Facebook SDK (carregado de forma assíncrona) -->
+  <!-- Facebook SDK: ensure correct locale and async init -->
   <script>
     window.fbAsyncInit = function() {
       FB.init({
@@ -81,6 +65,8 @@
         xfbml: true,
         version: 'v19.0'
       });
+      // Optionally check status on init
+      FB.getLoginStatus(function(res){ if(res.status === 'connected') fetchUserProfile(); });
     };
     (function(d, s, id){
       var js, fjs = d.getElementsByTagName(s)[0];
@@ -90,11 +76,17 @@
       fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
   </script>
+  <meta property="fb:app_id" content="1363366952176543">
+  <meta property="og:site_name" content="Loja Marketplace">
+  <!-- For troubleshooting: declare allowed domain explicitly -->
+  <meta name="facebook-domain-verification" content="hellmet64f.github.io">
 </head>
-
 <body>
   <div id="facebook-jssdk" aria-hidden="true" style="display:none"></div>
   <header>
+    <div class="notice">
+      Aviso: Login do Facebook funciona apenas em domínios autorizados. Publique via GitHub Pages em https://hellmet64f.github.io/loja-marketplace/ e adicione este domínio no App do Facebook (Settings > Basic > App Domains). Para testar sem produção, use usuários de teste no painel do app.
+    </div>
     <div class="wrap header-row">
       <div class="brand">
         <div class="brand-badge">M</div>
@@ -102,21 +94,19 @@
       </div>
       <div class="actions">
         <!-- Área de usuário -->
-        <div id="userInfo" class="muted">
+        <div class="muted" id="userInfo">
           <img id="userAvatar" alt="Avatar" />
           <span>Olá, <strong id="userName"></strong></span>
-          <button id="logoutButton" class="chip" type="button">Sair</button>
+          <button class="chip" id="logoutButton" type="button">Sair</button>
         </div>
         <!-- Botão de login Facebook -->
-        <button id="fbLoginBtn" type="button" aria-label="Entrar com Facebook">
-          <!-- pequeno ícone F -->
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12.06C22 6.48 17.52 2 11.94 2 6.36 2 1.88 6.48 1.88 12.06c0 5.01 3.66 9.16 8.44 9.94v-7.03H7.9v-2.91h2.42V9.64c0-2.39 1.42-3.71 3.58-3.71 1.04 0 2.13.19 2.13.19v2.35h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.91H13.3V22c4.78-.78 8.44-4.93 8.44-9.94Z"/></svg>
+        <button aria-label="Entrar com Facebook" id="fbLoginBtn" type="button">
+          <svg aria-hidden="true" fill="currentColor" width="16" height="16" viewBox="0 0 24 24"><path d="M22 12.06C22 6.48 17.52 2 11.94 2 6.36 2 1.88 6.48 1.88 12.06c0 5.01 3.66 9.16 8.44 9.94v-7.03H7.9v-2.91h2.42V9.64c0-2.39 1.42-3.71 3.58-3.71 1.04 0 2.13.19 2.13.19v2.35h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.91H13.3V22c4.78-.78 8.44-4.93 8.44-9.94Z"></path></svg>
           Entrar com Facebook
         </button>
       </div>
     </div>
   </header>
-
   <main class="wrap">
     <!-- Chips de filtros adicionais (simples) -->
     <section class="filters">
@@ -127,13 +117,11 @@
         <div class="chip" data-chip="garantia">Garantia</div>
       </div>
     </section>
-
     <!-- Grid de anúncios -->
     <section id="grid" class="grid" aria-live="polite">
       <!-- Cards inseridos dinamicamente por marketplace.js -->
     </section>
   </main>
-
   <footer>
     <div class="wrap">Projeto de exemplo para marketplace de assinaturas. Código com comentários explicativos.</div>
   </footer>
@@ -142,21 +130,21 @@
   <dialog id="detalhesModal">
     <div class="modal-head">
       <strong id="detalhesTitulo">Assinatura</strong>
-      <button class="chip" id="fecharModal" aria-label="Fechar">Fechar</button>
+      <button id="fecharModal" class="chip" aria-label="Fechar">Fechar</button>
     </div>
     <div class="modal-body">
       <div id="detalhesThumb" class="thumb" aria-hidden="true">🎬</div>
-      <div class="muted" id="detalhesVendedor"></div>
+      <div id="detalhesVendedor" class="muted"></div>
       <div id="detalhesDescricao"></div>
       <div class="meta">
-        <span class="price" id="detalhesPreco"></span>
-        <span class="rating" id="detalhesAvaliacao"></span>
+        <span id="detalhesPreco" class="price"></span>
+        <span id="detalhesAvaliacao" class="rating"></span>
       </div>
       <small class="muted">Observação: esta é apenas uma simulação para fins de demonstração.</small>
     </div>
     <div class="modal-actions">
-      <button class="chip" id="btnAdicionarCarrinho">Adicionar ao carrinho</button>
-      <button class="btn" id="btnSimularCompra">Simular compra</button>
+      <button id="btnAdicionarCarrinho" class="chip">Adicionar ao carrinho</button>
+      <button id="btnSimularCompra" class="btn">Simular compra</button>
     </div>
   </dialog>
 
@@ -180,12 +168,12 @@
           userAvatarEl.style.display = 'none';
         }
         userInfoEl.style.display = 'flex';
-        fbLoginBtn.style.display = 'none';
+        if (fbLoginBtn) fbLoginBtn.style.display = 'none';
       } else {
         userNameEl.textContent = '';
         userAvatarEl.style.display = 'none';
         userInfoEl.style.display = 'none';
-        fbLoginBtn.style.display = 'inline-flex';
+        if (fbLoginBtn) fbLoginBtn.style.display = 'inline-flex';
       }
     }
 
